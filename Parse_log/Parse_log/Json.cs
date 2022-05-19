@@ -38,16 +38,35 @@ namespace Parse_log
         /// <returns> status code</returns>
         private string addToExcel(string[] logs)
         {
-            //Excel excel = new Excel(0); // opens first worksheet of excel
-            int row = 0;
-            int column = 0;
+            Excel excel = new Excel(0); // opens first worksheet of excel
+            string excelCode;
             string[][] attributes = seperate_attributes(logs);
             for(int i = 0; i< attributes.Length; i++)
             {
                 for(int j = 0; j < attributes[i].Length; j++)
                 {
-                    Console.WriteLine(attributes[i][j]); // TOIMII
+                    string value;
+                    if (attributes[i][j].Length > 1)
+                    {
+
+                        value = attributes[i][j];
+                        Console.WriteLine(attributes[i][j]); // TOIMII
+                        excelCode = selectExcelCell(excel, value, i, j);
+                        if (excelCode.Length > 2) return "Problem adding to excel: " + excelCode;
+                    }
                 }
+            }
+            return "ok";
+        }
+        private string selectExcelCell(Excel excel, string value, int row, int column)
+        {
+            try
+            {
+                excel.Write(value, row, column);
+            }
+            catch(Exception e)
+            {
+                return e.ToString();
             }
             return "ok";
         }

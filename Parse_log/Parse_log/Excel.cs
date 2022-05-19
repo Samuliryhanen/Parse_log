@@ -32,6 +32,10 @@ namespace Parse_log
             wb.Save();
         }
 
+        public void Write(string value, int row, int column)
+        {
+            //TODO:
+        }
         /// <summary>
         /// Writes to a file in a specific range
         /// </summary>
