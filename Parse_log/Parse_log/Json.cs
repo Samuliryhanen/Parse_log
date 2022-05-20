@@ -16,13 +16,13 @@ namespace Parse_log
         /// Process data from a file into an array
         /// </summary>
         /// <param name="pathname"></param>
-        public string processData(string pathname)
+        public string ProcessData(string pathname)
         {
             string status;
             try
             {
-                string[] logs = readFile(pathname);
-                status = addToExcel(logs);
+                string[] logs = ReadFile(pathname);
+                status = AddToExcel(logs);
             }
             catch (Exception e)
             {
@@ -36,11 +36,11 @@ namespace Parse_log
         /// </summary>
         /// <param name="logs"> array written</param>
         /// <returns> status code</returns>
-        private string addToExcel(string[] logs)
+        private string AddToExcel(string[] logs)
         {
-            Excel excel = new Excel(0); // opens first worksheet of excel
+            Excel excel = new Excel(@"test.xlsx", 1); // opens first worksheet of excel
             string excelCode;
-            string[][] attributes = seperate_attributes(logs);
+            string[][] attributes = SeperateAttributes(logs);
             for(int i = 0; i< attributes.Length; i++)
             {
                 for(int j = 0; j < attributes[i].Length; j++)
@@ -50,16 +50,20 @@ namespace Parse_log
                     {
 
                         value = attributes[i][j];
-                        Console.WriteLine(attributes[i][j]); // TOIMII
-                        excelCode = selectExcelCell(excel, value, i, j);
-                        if (excelCode.Length > 2) return "Problem adding to excel: " + excelCode;
+                       // Console.WriteLine(value);
+                        excelCode = SelectExcelCell(excel, value, i, j);
+                        if (excelCode != "ok") return "Problem adding to excel: " + excelCode;
                     }
                 }
             }
+            excel.SaveAs(@"C:\genretech\loginPuhdistus\Parse_log\test.xlsx");
+            excel.Close();
             return "ok";
         }
-        private string selectExcelCell(Excel excel, string value, int row, int column)
+        private string SelectExcelCell(Excel excel, string value, int row, int column)
         {
+            row++;
+            column++;
             try
             {
                 excel.Write(value, row, column);
@@ -76,17 +80,19 @@ namespace Parse_log
         /// </summary>
         /// <param name="logs"></param>
         /// <returns></returns>
-        private string[][] seperate_attributes(string[] logs)
+        private string[][] SeperateAttributes(string[] logs)
         {
-            string[] subs;
+            string subs;
             string[][] attributes = new string[logs.Length][];
-            
+            string[] temp;
             for(int i = 0; i < logs.Length; i++)
             {
-                subs = logs[i].Split('{', 2);
-                attributes[i] = subs[1].Split('"');
+                subs = logs[i].Replace('"', ' '); // Remove the date-time string before actual JSON-notation
+                temp = subs.Split(' ');
+                string[] foo = Array.FindAll(temp, c => c.Length > 1); // copy everything thats longer than 1 char
+                attributes[i] = foo;
             }
-            return attributes;
+            return attributes; 
             
         }
 
@@ -95,14 +101,14 @@ namespace Parse_log
         /// </summary>
         /// <param name="pathname"> Given pathname</param>
         /// <returns>Array from the rows of the file</returns>
-        private string[] readFile(string pathname)
+        private string[] ReadFile(string pathname)
         {
             string extension = Path.GetExtension(pathname);
             string[] file_text = { };
 
             if (extension == ".txt")
             {
-                file_text = readTxt(pathname);
+                file_text = ReadTxt(pathname);
             }
             // Jos tiedostotyyppi on eri
             if (extension == ".json")
@@ -116,7 +122,7 @@ namespace Parse_log
         /// </summary>
         /// <param name="pathname"> file location</param>
         /// <returns>Array, row as an index</returns>
-        private string[] readTxt(string pathname)
+        private string[] ReadTxt(string pathname)
         {
             // Read entire text file content in one string  
             string[] lines = File.ReadAllLines(pathname);

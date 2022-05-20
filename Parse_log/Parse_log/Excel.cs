@@ -11,11 +11,13 @@ namespace Parse_log
 {
     internal class Excel
     {
+        string path = "";
         _Application excel = new _Excel.Application();
         Workbook wb;
         Worksheet ws;
-        public Excel(int sheet)
+        public Excel(string path, int sheet)
         {
+            this.path = path;
             wb = excel.Workbooks.Add();
             ws = excel.Worksheets[sheet];
         }
@@ -34,7 +36,7 @@ namespace Parse_log
 
         public void Write(string value, int row, int column)
         {
-            //TODO:
+            ws.Cells[row, column].Value = value;
         }
         /// <summary>
         /// Writes to a file in a specific range
