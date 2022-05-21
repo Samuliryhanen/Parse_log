@@ -16,7 +16,7 @@ namespace Parse_log
         static void Main()
         {
             Json json = new Json();
-            Console.WriteLine(json.ProcessData("C://genretech/loginPuhdistus/Parse_log/test.txt"));
+            Console.WriteLine(json.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt"));
         }
     }
 }
