@@ -33,47 +33,9 @@ namespace Parse_log
         {
             wb.Save();
         }
-        public void AddToCell(string value, int row, int column)
+        public void CellColor(int row, int column, int colour)
         {
-            row++;
-            column++;
-            switch (column)
-            {
-                case 1:
-                    string[] timeAndInfo = ParseTimeAndInfo(value);
-                    Write(timeAndInfo[0], row, column);
-                    column++; 
-                    Write(timeAndInfo[1], row, column);
-                    break;
-                default:
-                    column++;
-                    Write(value, row, column);
-                    break;
-            }
-            if (column == 1)
-            {
-                CellColor(row, column);
-            }
-        }
-        private string[] ParseTimeAndInfo(string value)
-        {
-            string[] values = value.Split(" ", 2);
-            values[1] = values[1].Replace("{", "");
-            var date = values[0];
-            DateTime datetime = DateTime.ParseExact(date, "yyyy-MM-dd HH:mm:ss",
-                                            System.Globalization.CultureInfo.InvariantCulture);
-
-            values[0] = datetime.ToString();
-            return values;
-        }
-        public void CellColor(int row, int column)
-        {
-            Range formatRange;
-            formatRange = ws.get_Range("b1", "b1");
-            formatRange.Interior.Color = System.Drawing.
-            ColorTranslator.ToOle(System.Drawing.Color.Red);
-            ws.Cells[row, column] = "Red";
-
+            ws.Cells[row, column].Interior.Color = colour;
         }
         public void Write(string value, int row, int column)
         {

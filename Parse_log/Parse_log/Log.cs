@@ -70,6 +70,9 @@ namespace Parse_log
                 {
                     case "timeStamp":
                         excel.Write(logLine["timeStamp"], row, 1);
+                        // TODO: tähän funktio, jolla valitaan väri
+                        int colour = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.Red);
+                        excel.CellColor(row, 1, colour);
                         break;
                     case "level":
                         excel.Write(logLine["level"], row, 2);
