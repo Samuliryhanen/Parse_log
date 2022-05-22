@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Parse_log.Json;
+using static Parse_log.Log;
 
 namespace Parse_log
 {
@@ -15,8 +15,8 @@ namespace Parse_log
         [STAThread]
         static void Main()
         {
-            Json json = new Json();
-            Console.WriteLine(json.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt"));
+            Log log = new Log();
+            Console.WriteLine(log.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt"));
         }
     }
 }
