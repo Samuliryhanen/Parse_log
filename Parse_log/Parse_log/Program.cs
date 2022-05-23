@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Parse_log.Log;
-
+﻿/// <summary>
+/// Program for reading UIpath-log messages and inserting them to more readable excel-file
+/// @Author Samuli Ryhänen 25.05.2022
+/// </summary>
 namespace Parse_log
 {
     internal static class Program
@@ -16,7 +13,9 @@ namespace Parse_log
         static void Main()
         {
             Log log = new Log();
-            Console.WriteLine(log.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt"));
+
+            log.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt");
+
         }
     }
 }

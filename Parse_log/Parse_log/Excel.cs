@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Office.Interop.Excel;
+﻿using Microsoft.Office.Interop.Excel;
 using _Excel = Microsoft.Office.Interop.Excel;
 using Range = Microsoft.Office.Interop.Excel.Range;
-
+using System.Drawing;
+/// <summary>
+/// Excel class for reading and writing to an excel document
+/// @author Samuli Ryhänen 23.05.2022
+/// </summary>
 namespace Parse_log
 {
     internal class Excel
@@ -15,32 +14,60 @@ namespace Parse_log
         _Application excel = new _Excel.Application();
         Workbook wb;
         Worksheet ws;
+
         public Excel(string path, int sheet)
         {
             this.path = path;
             wb = excel.Workbooks.Add();
             ws = excel.Worksheets[sheet];
         }
+
         public void Close()
-        {
+        {   
             wb.Close();
         }
+
         public void SaveAs(string filename)
         {
             wb.SaveAs(filename);
         }
+
         public void Save()
         {
             wb.Save();
         }
-        public void CellColor(int row, int column, int colour)
+
+        /// <summary>
+        /// Apply background colouyr to a cell
+        /// </summary>
+        /// <param name="row">row index</param>
+        /// <param name="column">column index</param>
+        /// <param name="color">ARGB value for the color</param>
+        public void CellColor(int row, int column, Color color)
         {
-            ws.Cells[row, column].Interior.Color = colour;
+            ws.Cells[row, column].Interior.Color = color;
         }
+
+        /// <summary>
+        /// Write value to a cell
+        /// </summary>
+        /// <param name="value">value</param>
+        /// <param name="row">row index</param>
+        /// <param name="column">column index</param>
         public void Write(string value, int row, int column)
         {
             ws.Cells[row, column].Value = value;
+            
         }
+        /// <summary>
+        /// autofit content 
+        /// </summary>
+        public void fitContent()
+        {
+            Range usedRange = ws.UsedRange;
+            usedRange.Columns.AutoFit();
+        }
+
         /// <summary>
         /// Writes to a file in a specific range
         /// </summary>

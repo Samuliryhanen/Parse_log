@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
 /// <summary>
-/// Class for reading ".txt"-file
+/// Class for reading UIpath-log messages and inserting them to more readable excel-file
+/// @Author Samuli Ryhänen 25.05.2022
 /// </summary>
 namespace Parse_log
 {
     internal class Log
     {
+
+         
         /// <summary>
         /// Process data from a file into an array
         /// </summary>
@@ -44,38 +43,54 @@ namespace Parse_log
         static private string AddToExcel(string[] logs)
         {
             Excel excel = new Excel(@"short_test.xlsx", 1); // opens first worksheet of excel
-            
+            AddHeaders(excel);
             List<Dictionary<string, string>> logsList = SeperateAttributes(logs);
             for(int i = 0; i< logsList.Count; i++)
             {
-                try
-                {
-                    AddRow(excel, logsList[i], i + 1);
-                }
-                catch(Exception e)
-                {
-                    return "Something went wrong: " + e; 
-                }
+                AddRow(excel, logsList[i], i + 2); // first row is for the headers
             }
+            excel.fitContent();
             excel.SaveAs(@"C:\genretech\loginPuhdistus\test\short_test.xlsx");
             excel.Close();
             return "ok";
         }
-        static private void AddRow(Excel excel, Dictionary<string, string> logLine, int row)
+
+        /// <summary>
+        /// Add headers to first line of excel
+        /// </summary>
+        /// <param name="excel"></param>
+        static private void AddHeaders(Excel excel)
         {
-            
+            string[] headers = { "Timestamp", "Log level", "Process name", "Message", "Filename", "Process version", "Robot name", "Machine id", "Fingerprint" };
+            for(int i = 0; i < headers.Length; i++)
+            {
+                excel.Write(headers[i], 1, i+1);
+            }
+
+        }
+
+        /// <summary>
+        /// Add a single row from the dictionary to excell
+        /// </summary>
+        /// <param name="excel">excell</param>
+        /// <param name="logLine">row added</param>
+        /// <param name="row">row index</param>
+        static private void AddRow(Excel excel, Dictionary<string, string> logLine, int row)
+        {   
             var keys = logLine.Keys;
+            
             foreach(string key in keys){
+                int column = 10;
                 switch (key)
                 {
                     case "timeStamp":
-                        excel.Write(logLine["timeStamp"], row, 1);
-                        // TODO: tähän funktio, jolla valitaan väri
-                        int colour = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.Red);
-                        excel.CellColor(row, 1, colour);
-                        break;
+                        string time = FormatTime(logLine["timeStamp"]);
+                        excel.Write(time, row, 1);
+                       break;
                     case "level":
                         excel.Write(logLine["level"], row, 2);
+                        Color color = ChooseColor(logLine["level"]);
+                        excel.CellColor(row, 2, color);
                         break;
                     case "processName":
                         excel.Write(logLine["processName"], row, 3);
@@ -92,19 +107,77 @@ namespace Parse_log
                     case "robotName":
                         excel.Write(logLine["robotName"], row, 7);
                         break;
-                        
+                    case "machineId":
+                        excel.Write(logLine["machineId"], row, 8);
+                        break;
+                    case "jobId":
+                        excel.Write(logLine["jobId"], row, 9);
+                        break;
                     default:
-                        // TODO:Loppujen arvojen syöttö soluihin?
+                        string keyAndVal = key + " : " + logLine[key];
+                        excel.Write(keyAndVal, row, column);
+                        column++;
                         break;
                 }
             }
         }
 
+        static private string FormatTime(string time)
+        {
+            string formatted = "";
+            
+            try
+            {
+                int index = time.Length - 6;
+                formatted = time.Replace('T', ' ').Remove(index);
+            } //DOTO: Datetime formatting
+            catch
+            {
+                formatted = time;
+            }
+            return formatted; 
+        }
+
         /// <summary>
-        /// iterate each line of logs[] and seperate the data from each line
+        /// Choose a color for a log message level
+        /// </summary>
+        /// <param name="logLevel">log level</param>
+        /// <returns> Color value</returns>
+        static private Color ChooseColor(string logLevel)
+        {
+            Color color;
+            switch (logLevel)
+            {
+                case "Information":
+                    color = Color.DarkGreen;
+                    break;
+                case "Error":
+                    color = Color.RosyBrown;
+                    break;
+                case "Fatal":
+                    color = Color.IndianRed;
+                    break;
+                case "Warning":
+                    color = Color.LightGoldenrodYellow;
+                    break;
+                case "Trace":
+                    color = Color.CadetBlue;
+                    break;
+                case "Verbose":
+                    color = Color.DarkGray;
+                    break;
+                default:
+                    color = Color.White;
+                    break;
+            }
+            return color;
+        }
+
+        /// <summary>
+        /// Create dictionary from each row of logs
         /// </summary>
         /// <param name="logs"></param>
-        /// <returns>array with only attribute values</returns>
+        /// <returns>List dictionary with attributes as key values</returns>
         static private List<Dictionary<string, string>> SeperateAttributes(string[] logs)
         {
 
@@ -119,6 +192,12 @@ namespace Parse_log
             }
             return attributes;
         }
+
+        /// <summary>
+        /// Modify a row from logs and split in to a dictionary
+        /// </summary>
+        /// <param name="elements">Row from logs</param>
+        /// <returns> dictionary with attribute key and value as value</returns>
         static private Dictionary<string, string> mapElements(string elements)
         {
             Dictionary<string, string> mappedElements = new Dictionary<string, string>();
@@ -130,6 +209,7 @@ namespace Parse_log
             return mappedElements;
             
         }
+
         /// <summary>
         /// Read file from a given location and return every line of that file in an array
         /// </summary>
@@ -148,6 +228,7 @@ namespace Parse_log
             
             return file_text;
         }
+
         /// <summary>
         /// Reads a "txt"-file and returns an array of every row 
         /// </summary>
