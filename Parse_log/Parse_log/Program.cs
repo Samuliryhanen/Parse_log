@@ -6,15 +6,19 @@ namespace Parse_log
 {
     internal static class Program
     {
+        
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            Log log = new Log();
+            if(args.Length >= 1)
+            {
+                Log log = new Log();
+                log.ProcessData(args[0]);
 
-            log.ProcessData("C://genretech/loginPuhdistus/test/Meita2_TUHOA.txt");
+            }
 
         }
     }

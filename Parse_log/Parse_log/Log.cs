@@ -20,7 +20,7 @@ namespace Parse_log
             try
             {
                 string[] logs = ReadFile(pathname); 
-                status = AddToExcel(logs);
+                status = AddToExcel(logs, pathname);
             }
             catch (Exception e)
             {
@@ -29,20 +29,16 @@ namespace Parse_log
             return status;
         }
 
-
-
-        /// TODO: aliohjelma pathin käsittelyyn
-
-
-
         /// <summary>
         /// Write an array into an excel document
         /// </summary>
         /// <param name="logs"> array written</param>
         /// <returns> status code</returns>
-        static private string AddToExcel(string[] logs)
+        static private string AddToExcel(string[] logs, string pathName)
         {
-            Excel excel = new Excel(@"Meita2_TUHOA.xlsx", 1); // opens first worksheet of excel
+            string file = Path.GetFileNameWithoutExtension(pathName);
+            string excelName = file + ".xlsx";
+            Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
             AddHeaders(excel);
             List<Dictionary<string, string>> logsList = SeperateAttributes(logs);
             for(int i = 0; i< logsList.Count; i++)
@@ -50,7 +46,8 @@ namespace Parse_log
                 AddRow(excel, logsList[i], i + 2); // first row is for the headers
             }
             excel.fitContent();
-            excel.SaveAs(@"C:\genretech\loginPuhdistus\test\Meita2_TUHOA.xlsx");
+            string path = Path.GetDirectoryName(pathName) + "/" + Path.GetFileNameWithoutExtension(excelName);
+            excel.SaveAs(@path);
             excel.Close();
             return "ok";
         }
