@@ -14,7 +14,7 @@ namespace Parse_log
         {
             Log log = new Log();
 
-            log.ProcessData("C://genretech/loginPuhdistus/test/short_test.txt");
+            log.ProcessData("C://genretech/loginPuhdistus/test/Meita2_TUHOA.txt");
 
         }
     }

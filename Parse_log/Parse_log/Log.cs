@@ -42,7 +42,7 @@ namespace Parse_log
         /// <returns> status code</returns>
         static private string AddToExcel(string[] logs)
         {
-            Excel excel = new Excel(@"short_test.xlsx", 1); // opens first worksheet of excel
+            Excel excel = new Excel(@"Meita2_TUHOA.xlsx", 1); // opens first worksheet of excel
             AddHeaders(excel);
             List<Dictionary<string, string>> logsList = SeperateAttributes(logs);
             for(int i = 0; i< logsList.Count; i++)
@@ -50,7 +50,7 @@ namespace Parse_log
                 AddRow(excel, logsList[i], i + 2); // first row is for the headers
             }
             excel.fitContent();
-            excel.SaveAs(@"C:\genretech\loginPuhdistus\test\short_test.xlsx");
+            excel.SaveAs(@"C:\genretech\loginPuhdistus\test\Meita2_TUHOA.xlsx");
             excel.Close();
             return "ok";
         }
@@ -78,63 +78,75 @@ namespace Parse_log
         static private void AddRow(Excel excel, Dictionary<string, string> logLine, int row)
         {   
             var keys = logLine.Keys;
-            
-            foreach(string key in keys){
-                int column = 10;
-                switch (key)
+            int column = 10;
+            try
+            {
+                foreach (string key in keys)
                 {
-                    case "timeStamp":
-                        string time = FormatTime(logLine["timeStamp"]);
-                        excel.Write(time, row, 1);
-                       break;
-                    case "level":
-                        excel.Write(logLine["level"], row, 2);
-                        Color color = ChooseColor(logLine["level"]);
-                        excel.CellColor(row, 2, color);
-                        break;
-                    case "processName":
-                        excel.Write(logLine["processName"], row, 3);
-                        break;
-                    case "message":
-                        excel.Write(logLine["message"], row, 4);
-                        break;
-                    case "fileName":
-                        excel.Write(logLine["fileName"], row, 5);
-                        break;
-                    case "processVersion":
-                        excel.Write(logLine["processVersion"], row, 6);
-                        break;
-                    case "robotName":
-                        excel.Write(logLine["robotName"], row, 7);
-                        break;
-                    case "machineId":
-                        excel.Write(logLine["machineId"], row, 8);
-                        break;
-                    case "jobId":
-                        excel.Write(logLine["jobId"], row, 9);
-                        break;
-                    default:
-                        string keyAndVal = key + " : " + logLine[key];
-                        excel.Write(keyAndVal, row, column);
-                        column++;
-                        break;
+
+                    switch (key)
+                    {
+                        case "timeStamp":
+                            string time = FormatTime(logLine["timeStamp"]);
+                            excel.Write(time, row, 1);
+                            break;
+                        case "level":
+                            excel.Write(logLine["level"], row, 2);
+                            Color color = ChooseColor(logLine["level"]);
+                            excel.CellColor(row, 2, color);
+                            break;
+                        case "processName":
+                            excel.Write(logLine["processName"], row, 3);
+                            break;
+                        case "message":
+                            excel.Write(logLine["message"], row, 4);
+                            break;
+                        case "fileName":
+                            excel.Write(logLine["fileName"], row, 5);
+                            break;
+                        case "processVersion":
+                            excel.Write(logLine["processVersion"], row, 6);
+                            break;
+                        case "robotName":
+                            excel.Write(logLine["robotName"], row, 7);
+                            break;
+                        case "machineId":
+                            excel.Write(logLine["machineId"], row, 8);
+                            break;
+                        case "jobId":
+                            excel.Write(logLine["jobId"], row, 9);
+                            break;
+                        default:
+                            string keyAndVal = key + " = " + logLine[key];
+                            keyAndVal.Replace(',', ' ').Replace('}', ' ');
+                            excel.Write(keyAndVal, row, column);
+                            column++;
+                            break;
+                    }
                 }
             }
+            catch(Exception e)
+            {
+                Console.WriteLine("Error inserting excel: " + e);
+            }
+            
         }
 
         static private string FormatTime(string time)
         {
-            string formatted = "";
-            
+            string formatted;
             try
             {
-                int index = time.Length - 6;
-                formatted = time.Replace('T', ' ').Remove(index);
-            } //DOTO: Datetime formatting
+                DateTime datetime = DateTime.ParseExact(time, "yyyy-MM-ddTHH:mm:ss.fffffffzzz",
+                                           System.Globalization.CultureInfo.InvariantCulture);
+                formatted = datetime.ToString("yyyy-MM-dd HH:mm:ss.fffffff");
+            }
+            /// seconds have sometimes different amount of decimals
             catch
             {
                 formatted = time;
             }
+            
             return formatted; 
         }
 
