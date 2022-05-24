@@ -2,54 +2,40 @@
 
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
-/// @Author Samuli Ryhänen 25.05.2022
+/// @Author Samuli Ryhänen 24.05.2022
 /// </summary>
 namespace Parse_log
 {
     internal class Log
     {
-
          
         /// <summary>
         /// Process data from a file into an array
         /// </summary>
-        /// <param name="pathname"></param>
-        public string ProcessData(string pathname)
+        /// <param name="pathName"></param>
+        public string ProcessData(string pathName)
         {
             string status;
+            string file = Path.GetFileNameWithoutExtension(pathName);
+            string excelName = file + ".xlsx";
+            Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
+            AddHeaders(excel);
+
             try
             {
-                string[] logs = ReadFile(pathname); 
-                status = AddToExcel(logs, pathname);
+                TransferData(pathName, excel);
+                status = excelName;
             }
             catch (Exception e)
             {
                 status = "Error: " + (e.Message);
             }
-            return status;
-        }
 
-        /// <summary>
-        /// Write an array into an excel document
-        /// </summary>
-        /// <param name="logs"> array written</param>
-        /// <returns> status code</returns>
-        static private string AddToExcel(string[] logs, string pathName)
-        {
-            string file = Path.GetFileNameWithoutExtension(pathName);
-            string excelName = file + ".xlsx";
-            Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
-            AddHeaders(excel);
-            List<Dictionary<string, string>> logsList = SeperateAttributes(logs);
-            for(int i = 0; i< logsList.Count; i++)
-            {
-                AddRow(excel, logsList[i], i + 2); // first row is for the headers
-            }
             excel.fitContent();
             string path = Path.GetDirectoryName(pathName) + "/" + Path.GetFileNameWithoutExtension(excelName);
             excel.SaveAs(@path);
             excel.Close();
-            return "ok";
+            return status;
         }
 
         /// <summary>
@@ -59,11 +45,35 @@ namespace Parse_log
         static private void AddHeaders(Excel excel)
         {
             string[] headers = { "Timestamp", "Log level", "Process name", "Message", "Filename", "Process version", "Robot name", "Machine id", "Fingerprint" };
-            for(int i = 0; i < headers.Length; i++)
+            for (int i = 0; i < headers.Length; i++)
             {
-                excel.Write(headers[i], 1, i+1);
+                excel.Write(headers[i], 1, i + 1);
             }
 
+        }
+
+        /// <summary>
+        /// Read .txt-file from a given path and transfer it directly line by line into an excel file
+        /// </summary>
+        /// <param name="pathName">path to txt</param>
+        /// <param name="excel"> excel </param>
+        static void TransferData(string pathName, Excel excel)
+        {
+
+            List<Dictionary<string, string>> lines = new List<Dictionary<string, string>>();
+
+            using (StreamReader sr = new StreamReader(pathName))
+            {
+                String line;
+                Dictionary<string, string> mappedLine;
+                int i = 2; // first excel row is for headers, so begin from line 2.
+                while ((line = sr.ReadLine()) != null)
+                {
+                    mappedLine = MapElements(line.Split('{', 2)[1]); // need to separate parts before actual data
+                    AddExcelRow(excel, mappedLine, i); // insert row directly to an excel
+                    i++; // index for excel row
+                }
+            }
         }
 
         /// <summary>
@@ -72,7 +82,7 @@ namespace Parse_log
         /// <param name="excel">excell</param>
         /// <param name="logLine">row added</param>
         /// <param name="row">row index</param>
-        static private void AddRow(Excel excel, Dictionary<string, string> logLine, int row)
+        static private void AddExcelRow(Excel excel, Dictionary<string, string> logLine, int row)
         {   
             var keys = logLine.Keys;
             int column = 10;
@@ -86,6 +96,7 @@ namespace Parse_log
                         case "timeStamp":
                             string time = FormatTime(logLine["timeStamp"]);
                             excel.Write(time, row, 1);
+                            //excel.TextFormatOff(1); // remove textformat for timestamp
                             break;
                         case "level":
                             excel.Write(logLine["level"], row, 2);
@@ -122,6 +133,7 @@ namespace Parse_log
                     }
                 }
             }
+
             catch(Exception e)
             {
                 Console.WriteLine("Error inserting excel: " + e);
@@ -129,6 +141,28 @@ namespace Parse_log
             
         }
 
+        /// <summary>
+        /// Modify a row from logs and split in to a dictionary
+        /// </summary>
+        /// <param name="elements">Row from logs</param>
+        /// <returns> dictionary with attribute key and value as value</returns>
+        static private Dictionary<string, string> MapElements(string elements)
+        {
+            Dictionary<string, string> mappedElements = new Dictionary<string, string>();
+            List<string> subs = elements.Split('"').Where(c => c.Length > 1).ToList();
+            for (int i = 0; i < subs.Count - 1; i += 2)
+            {
+                mappedElements.Add(subs[i], subs[i + 1]);
+            }
+            return mappedElements;
+
+        }
+
+        /// <summary>
+        /// Format time to a wanted string 
+        /// </summary>
+        /// <param name="time">timestamp </param>
+        /// <returns>formatted time in a string</returns>
         static private string FormatTime(string time)
         {
             string formatted;
@@ -143,8 +177,8 @@ namespace Parse_log
             {
                 formatted = time;
             }
-            
-            return formatted; 
+
+            return formatted;
         }
 
         /// <summary>
@@ -180,74 +214,6 @@ namespace Parse_log
                     break;
             }
             return color;
-        }
-
-        /// <summary>
-        /// Create dictionary from each row of logs
-        /// </summary>
-        /// <param name="logs"></param>
-        /// <returns>List dictionary with attributes as key values</returns>
-        static private List<Dictionary<string, string>> SeperateAttributes(string[] logs)
-        {
-
-            List<Dictionary<string, string>> attributes = new List<Dictionary<string, string>>();
-
-            string jsonString;
-            for(int i = 0; i < logs.Length; i++)
-            {
-                jsonString = logs[i].Split('{', 2)[1]; // seperate elements with "-char and discard every leftout element, with the length of 1 
-                Dictionary<string, string> temp = mapElements(jsonString);
-                attributes.Add(temp);
-            }
-            return attributes;
-        }
-
-        /// <summary>
-        /// Modify a row from logs and split in to a dictionary
-        /// </summary>
-        /// <param name="elements">Row from logs</param>
-        /// <returns> dictionary with attribute key and value as value</returns>
-        static private Dictionary<string, string> mapElements(string elements)
-        {
-            Dictionary<string, string> mappedElements = new Dictionary<string, string>();
-            List<string> subs = elements.Split('"').Where(c => c.Length > 1).ToList();
-            for (int i = 0; i < subs.Count - 1; i+=2)
-            {
-                mappedElements.Add(subs[i], subs[i + 1]);
-            }
-            return mappedElements;
-            
-        }
-
-        /// <summary>
-        /// Read file from a given location and return every line of that file in an array
-        /// </summary>
-        /// <param name="pathname"> Given pathname</param>
-        /// <returns>Array from the rows of the file</returns>
-        static private string[] ReadFile(string pathname)
-        {
-            string extension = Path.GetExtension(pathname);
-            string[] file_text;
-
-            if (extension == ".txt")
-            {
-                file_text = ReadTxt(pathname);
-            }
-            else file_text = new string[] { extension + " is not included yet" };
-            
-            return file_text;
-        }
-
-        /// <summary>
-        /// Reads a "txt"-file and returns an array of every row 
-        /// </summary>
-        /// <param name="pathname"> file location</param>
-        /// <returns>Array, row as an index</returns>
-        static private string[] ReadTxt(string pathname)
-        {
-            // Read entire text file content in one string  
-            string[] lines = File.ReadAllLines(pathname);
-            return lines;
         }
     }
 }

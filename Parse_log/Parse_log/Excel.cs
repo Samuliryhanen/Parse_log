@@ -4,7 +4,7 @@ using Range = Microsoft.Office.Interop.Excel.Range;
 using System.Drawing;
 /// <summary>
 /// Excel class for reading and writing to an excel document
-/// @author Samuli Ryhänen 23.05.2022
+/// @author Samuli Ryhänen 24.05.2022
 /// </summary>
 namespace Parse_log
 {
@@ -59,6 +59,7 @@ namespace Parse_log
             ws.Cells[row, column].Value = value;
             
         }
+
         /// <summary>
         /// autofit content 
         /// </summary>
