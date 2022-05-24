@@ -15,21 +15,22 @@ namespace Parse_log
         {
             Log log = new Log();
             string name = "";
-            if (args.Length >= 1)
-            {
-                Console.WriteLine("Processing data...");
-                try
-                {
-                    name = log.ProcessData(args[0]);
-                    Console.WriteLine("Data in excel: " + name);
-                }
-                catch // En ole varma toimiiko tämä try-catch halutulla tavalla
-                {
-                    Console.WriteLine("Error inserting data: " + name);
-                }
-
-
-            }
+            log.ProcessData(@"C:\genretech\loginPuhdistus\test\short_test.txt");
+            //if (args.Length >= 1)
+            //{
+            //    Console.WriteLine("Processing data...");
+            //    try
+            //    {
+            //        name = log.ProcessData(args[0]);
+            //        Console.WriteLine("Data in excel: " + name);
+            //    }
+            //    catch // En ole varma toimiiko tämä try-catch halutulla tavalla
+            //    {
+            //        Console.WriteLine("Error inserting data: " + name);
+            //    }
+            //
+            //
+            //}
             
         }
     }

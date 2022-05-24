@@ -56,15 +56,20 @@ namespace Parse_log
         /// <param name="column">column index</param>
         public void Write(string value, int row, int column)
         {
+            if(column != 2 && row % 2 != 0)
+            {
+                CellColor(row, column, Color.LightGray);
+            }
             ws.Cells[row, column].Value = value;
-            
         }
 
         /// <summary>
-        /// autofit content 
+        /// Wrap cell content into more readable shape
         /// </summary>
         public void fitContent()
         {
+            ws.Columns[4].ColumnWidth = 60;
+            ws.Columns[4].WrapText = true;
             Range usedRange = ws.UsedRange;
             usedRange.Columns.AutoFit();
         }
