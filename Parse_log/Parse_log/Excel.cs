@@ -23,8 +23,9 @@ namespace Parse_log
         }
 
         public void Close()
-        {   
-            wb.Close();
+        {
+            wb.Close(true);
+            excel.Quit();
         }
 
         public void SaveAs(string filename)
