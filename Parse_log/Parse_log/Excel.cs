@@ -39,7 +39,17 @@ namespace Parse_log
         }
 
         /// <summary>
-        /// Apply background colouyr to a cell
+        /// Add filtering to specified column
+        /// </summary>
+        /// <param name="row">row for the column</param>
+        /// <param name="column">column index</param>
+        public void AddFilter(int row, int column)
+        {
+            ws.Cells[row, column].AutoFilter();
+        }
+
+        /// <summary>
+        /// Apply background color  from a cell
         /// </summary>
         /// <param name="row">row index</param>
         /// <param name="column">column index</param>
@@ -49,6 +59,16 @@ namespace Parse_log
             ws.Cells[row, column].Interior.Color = color;
         }
 
+        /// <summary>
+        /// change font color from a cell
+        /// </summary>
+        /// <param name="row">row index</param>
+        /// <param name="column">column index</param>
+        /// <param name="color">ARGB value for the color</param>
+        public void FontColor(int row, int column, Color color)
+        {
+            ws.Cells[row, column].Font.Color = color;
+        }
         /// <summary>
         /// Write value to a cell
         /// </summary>

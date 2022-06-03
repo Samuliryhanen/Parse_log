@@ -48,7 +48,9 @@ namespace Parse_log
             for (int i = 0; i < headers.Length; i++)
             {
                 excel.Write(headers[i], 1, i + 1);
-                excel.CellColor(1, i + 1, Color.Gray);
+                excel.AddFilter(1, i + 1);
+                excel.CellColor(1, i + 1, Color.Black);
+                excel.FontColor(1, i + 1, Color.White);
             }
 
         }
