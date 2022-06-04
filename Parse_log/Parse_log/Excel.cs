@@ -46,7 +46,7 @@ namespace Parse_log
         /// <param name="column">column index</param>
         public void AddFilter(int row, int column)
         {
-            ws.Cells[row, column].AutoFilter();
+            ws.Cells[row, column].AutoFilter(1, System.Reflection.Missing.Value, XlAutoFilterOperator.xlAnd, System.Reflection.Missing.Value, true);
         }
 
         /// <summary>

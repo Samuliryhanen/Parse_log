@@ -15,7 +15,7 @@ namespace Parse_log
         {
             Log log = new Log();
             string name = "";
-            log.ProcessData(@"C:\genretech\loginPuhdistus\test\short_test.txt");
+            log.ProcessData(@"C:\genretech\loginPuhdistus\test\Meita1_tuhoa.txt");
             if (args.Length >= 1)
             {
                 Console.WriteLine("Processing data...");
