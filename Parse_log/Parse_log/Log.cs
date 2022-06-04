@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
@@ -6,9 +7,35 @@
 /// </summary>
 namespace Parse_log
 {
+    //class to handle dilemma with overflown attributes
+    public class Headers
+    {
+        private List<string> overflowingHeaders = new List<string>(); // list for headers, which are not defined in switch-case sorting
+
+        public int AddHeader(string header)
+        {
+            overflowingHeaders.Add(header);
+            return overflowingHeaders.Count;
+        }
+        public int FindElementIndex(string element)
+        {
+            return overflowingHeaders.IndexOf(element);
+        }
+        public List<string> GetValues()
+        {
+            return overflowingHeaders;
+        }
+        public int GetLength()
+        {
+            return overflowingHeaders.Count;
+        }
+    }
+
+    /// <summary>
+    /// Actual log-class
+    /// </summary>
     internal class Log
     {
-         
         /// <summary>
         /// Process data from a file into an array
         /// </summary>
@@ -16,41 +43,33 @@ namespace Parse_log
         public string ProcessData(string pathName)
         {
             string status;
-            string file = Path.GetFileNameWithoutExtension(pathName);
-            string excelName = file + ".xlsx";
-            Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
-            AddHeaders(excel);
-
+            string file;
+            string excelName;
             try
             {
-                TransferData(pathName, excel);
-                status = excelName;
+                file = Path.GetFileNameWithoutExtension(pathName);
+                excelName = file + ".xlsx";
+                Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
+                Headers headers = new Headers();
+                try
+                {
+                    TransferData(pathName, excel, headers);
+                    status = excelName;
+                    excel.FitContent();
+                    string path = Path.GetDirectoryName(pathName)+ @"\" + Path.GetFileNameWithoutExtension(excelName);
+                    excel.SaveAs(@path);
+                    excel.Close();
+                }
+                catch (Exception e)
+                {
+                    status = "Error: " + (e.Message);
+                    excel.Close();
+                }
+                return status;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                status = "Error: " + (e.Message);
-            }
-
-            excel.fitContent();
-            string path = Path.GetDirectoryName(pathName) + "/" + Path.GetFileNameWithoutExtension(excelName);
-            excel.SaveAs(@path);
-            excel.Close();
-            return status;
-        }
-
-        /// <summary>
-        /// Add headers to first line of excel
-        /// </summary>
-        /// <param name="excel"></param>
-        static private void AddHeaders(Excel excel)
-        {
-            string[] headers = { "Timestamp", "Log level", "Process name", "Message", "Filename", "Process version", "Robot name", "Machine id", "Fingerprint" };
-            for (int i = 0; i < headers.Length; i++)
-            {
-                excel.Write(headers[i], 1, i + 1);
-                excel.AddFilter(1, i + 1);
-                excel.CellColor(1, i + 1, Color.Black);
-                excel.FontColor(1, i + 1, Color.White);
+                return "Error: " + e;
             }
 
         }
@@ -60,9 +79,9 @@ namespace Parse_log
         /// </summary>
         /// <param name="pathName">path to txt</param>
         /// <param name="excel"> excel </param>
-        static void TransferData(string pathName, Excel excel)
+        static void TransferData(string pathName, Excel excel, Headers headers)
         {
-
+            AddHeaders(excel, headers);
             List<Dictionary<string, string>> lines = new List<Dictionary<string, string>>();
 
             using (StreamReader sr = new StreamReader(pathName))
@@ -73,11 +92,49 @@ namespace Parse_log
                 while ((line = sr.ReadLine()) != null)
                 {
                     mappedLine = MapElements(line.Split('{', 2)[1]); // need to separate parts before actual data
-                    AddExcelRow(excel, mappedLine, i); // insert row directly to an excel
+                    AddExcelRow(excel, mappedLine, i, headers); // insert row directly to an excel
                     i++; // index for excel row
                 }
+                try
+                {
+                    int columnCount = headers.GetLength() + 9;
+                    for (int j = 1; j <= columnCount; j++)
+                    {
+                        excel.AddFilter(1, j);
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Error while inserting filters");
+                    excel.Close();
+                }
+                
             }
         }
+
+        /// <summary>
+        /// Add headers to first line of excel
+        /// </summary>
+        /// <param name="excel"></param>
+        static private void AddHeaders(Excel excel, Headers headers)
+        {
+            try
+            {
+                string[] values = { "Timestamp", "Log level", "Process name", "Message", "Filename", "Process version", "Robot name", "Machine id", "Fingerprint" };
+                for (int i = 0; i < values.Length; i++)
+                {
+                    excel.Write(values[i], 1, i + 1);
+                    excel.CellColor(1, i + 1, Color.Black);
+                    excel.FontColor(1, i + 1, Color.White);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error adding headers! ");
+                excel.Close();
+            }
+        }
+
 
         /// <summary>
         /// Add a single row from the dictionary to excell
@@ -85,21 +142,18 @@ namespace Parse_log
         /// <param name="excel">excell</param>
         /// <param name="logLine">row added</param>
         /// <param name="row">row index</param>
-        static private void AddExcelRow(Excel excel, Dictionary<string, string> logLine, int row)
+        static private void AddExcelRow(Excel excel, Dictionary<string, string> logLine, int row, Headers headers)
         {   
             var keys = logLine.Keys;
-            int column = 10;
             try
             {
                 foreach (string key in keys)
                 {
-
                     switch (key)
                     {
                         case "timeStamp":
                             string time = FormatTime(logLine["timeStamp"]);
                             excel.Write(time, row, 1);
-                            //excel.TextFormatOff(1); // remove textformat for timestamp
                             break;
                         case "level":
                             excel.Write(logLine["level"], row, 2);
@@ -128,10 +182,17 @@ namespace Parse_log
                             excel.Write(logLine["jobId"], row, 9);
                             break;
                         default:
-                            string keyAndVal = key + " = " + logLine[key];
-                            keyAndVal.Replace(',', ' ').Replace('}', ' ');
-                            excel.Write(keyAndVal, row, column);
-                            column++;
+                            int index = headers.FindElementIndex(key); // header list is shorter than all the headers in excel file
+                            if (index != -1)
+                            {
+                                index += 9;
+                                excel.Write(logLine[key], row, index);
+                            }
+                            else
+                            {
+                                index = 9 + headers.AddHeader(key); // header list is shorter than all the headers in excel file
+                                excel.WriteNew(key, logLine[key], row, index);
+                            }
                             break;
                     }
                 }
@@ -140,6 +201,7 @@ namespace Parse_log
             catch(Exception e)
             {
                 Console.WriteLine("Error inserting excel: " + e);
+                excel.Close();
             }
             
         }
@@ -152,7 +214,7 @@ namespace Parse_log
         static private Dictionary<string, string> MapElements(string elements)
         {
             Dictionary<string, string> mappedElements = new Dictionary<string, string>();
-            List<string> subs = elements.Split('"').Where(c => c.Length > 1).ToList();
+            List<string> subs = elements.Split('"').Where(c => c.Length > 1 || (c.Length == 1 && !Char.IsPunctuation(char.Parse(c)))).ToList();
             for (int i = 0; i < subs.Count - 1; i += 2)
             {
                 mappedElements.Add(subs[i], subs[i + 1]);

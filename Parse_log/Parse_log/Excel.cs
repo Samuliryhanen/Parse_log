@@ -2,6 +2,7 @@
 using _Excel = Microsoft.Office.Interop.Excel;
 using Range = Microsoft.Office.Interop.Excel.Range;
 using System.Drawing;
+
 /// <summary>
 /// Excel class for reading and writing to an excel document
 /// @author Samuli Ryhänen 24.05.2022
@@ -69,6 +70,22 @@ namespace Parse_log
         {
             ws.Cells[row, column].Font.Color = color;
         }
+
+        /// <summary>
+        /// Create a new column for a new occuring attribute
+        /// </summary>
+        /// <param name="header">new attribute</param>
+        /// <param name="value">value of the attribute</param>
+        /// <param name="row">row index</param>
+        /// <param name="column">column index</param>
+        public void WriteNew(string header, string value, int row, int column)
+        {
+            Write(header, 1, column); // add Header for column
+            CellColor(1, column, Color.Black); // column styles
+            FontColor(1, column, Color.White); //
+            Write(value, row, column); // write data for the cell
+        }
+
         /// <summary>
         /// Write value to a cell
         /// </summary>
@@ -77,9 +94,8 @@ namespace Parse_log
         /// <param name="column">column index</param>
         public void Write(string value, int row, int column)
         {
-            if(column != 2 && row % 2 != 0)
-            {
-                CellColor(row, column, Color.LightGray);
+            if (row != 1 && column != 2 && row % 2 != 0) {
+                ws.Cells[row, column].Interior.Color = Color.LightGray;
             }
             ws.Cells[row, column].Value = value;
         }
@@ -87,7 +103,7 @@ namespace Parse_log
         /// <summary>
         /// Wrap cell content into more readable shape
         /// </summary>
-        public void fitContent()
+        public void FitContent()
         {
             ws.Columns[4].ColumnWidth = 60;
             ws.Columns[4].WrapText = true;

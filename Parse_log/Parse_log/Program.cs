@@ -24,7 +24,7 @@ namespace Parse_log
                     name = log.ProcessData(args[0]);
                     Console.WriteLine("Data in excel: " + name);
                 }
-                catch // En ole varma toimiiko tämä try-catch halutulla tavalla
+                catch 
                 {
                     Console.WriteLine("Error inserting data: " + name);
                 }
