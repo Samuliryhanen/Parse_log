@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Text.RegularExpressions;
+using System.Text;
 
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
@@ -10,24 +11,47 @@ namespace Parse_log
     //class to handle dilemma with overflown attributes
     public class Headers
     {
-        private List<string> overflowingHeaders = new List<string>(); // list for headers, which are not defined in switch-case sorting
-
+        private List<string> OverflowingHeaders = new List<string>(); // list for headers, which are not defined in switch-case sorting
+        
+        /// <summary>
+        /// Add new member to List
+        /// </summary>
+        /// <param name="header"></param>
+        /// <returns></returns>
         public int AddHeader(string header)
         {
-            overflowingHeaders.Add(header);
-            return overflowingHeaders.Count;
+            OverflowingHeaders.Add(header);
+            return OverflowingHeaders.Count;
         }
+        /// <summary>
+        /// Find index of an element
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public int FindElementIndex(string element)
         {
-            return overflowingHeaders.IndexOf(element);
+            int index = OverflowingHeaders.IndexOf(element);
+            if (index != -1)
+            {
+                index++;
+            }
+            return index; 
         }
+        /// <summary>
+        /// Get List attribute
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetValues()
         {
-            return overflowingHeaders;
+            return OverflowingHeaders;
         }
-        public int GetLength()
+        /// <summary>
+        /// Get count of List
+        /// </summary>
+        /// <returns></returns>
+        public int GetCount()
         {
-            return overflowingHeaders.Count;
+            return OverflowingHeaders.Count;
         }
     }
 
@@ -55,6 +79,10 @@ namespace Parse_log
                 {
                     TransferData(pathName, excel, headers);
                     status = excelName;
+                    for(int i = 1; i < headers.GetCount(); i++)
+                    {
+                        excel.AddFilter(1, i);
+                    }
                     excel.FitContent();
                     string path = Path.GetDirectoryName(pathName)+ @"\" + Path.GetFileNameWithoutExtension(excelName);
                     excel.SaveAs(@path);
@@ -81,57 +109,27 @@ namespace Parse_log
         /// <param name="excel"> excel </param>
         static void TransferData(string pathName, Excel excel, Headers headers)
         {
-            AddHeaders(excel, headers);
-            List<Dictionary<string, string>> lines = new List<Dictionary<string, string>>();
-
+            AddHeader("timestamp",excel, 1, headers);
+            AddHeader("level", excel, 2, headers);
+            
             using (StreamReader sr = new StreamReader(pathName))
             {
-                String line;
+                string line;
                 Dictionary<string, string> mappedLine;
                 int i = 2; // first excel row is for headers, so begin from line 2.
                 while ((line = sr.ReadLine()) != null)
                 {
-                    mappedLine = MapElements(line.Split('{', 2)[1]); // need to separate parts before actual data
-                    AddExcelRow(excel, mappedLine, i, headers); // insert row directly to an excel
-                    i++; // index for excel row
-                }
-                try
-                {
-                    int columnCount = headers.GetLength() + 9;
-                    for (int j = 1; j <= columnCount; j++)
+                    try
                     {
-                        excel.AddFilter(1, j);
+                        mappedLine = MapElements(line); // need to separate parts before actual data
+                        AddExcelRow(excel, mappedLine, i, headers); // insert row directly to an excel
+                        i++;// index for excel row
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Error inserting rows!");
                     }
                 }
-                catch
-                {
-                    Console.WriteLine("Error while inserting filters");
-                    excel.Close();
-                }
-                
-            }
-        }
-
-        /// <summary>
-        /// Add headers to first line of excel
-        /// </summary>
-        /// <param name="excel"></param>
-        static private void AddHeaders(Excel excel, Headers headers)
-        {
-            try
-            {
-                string[] values = { "Timestamp", "Log level", "Process name", "Message", "Filename", "Process version", "Robot name", "Machine id", "Fingerprint" };
-                for (int i = 0; i < values.Length; i++)
-                {
-                    excel.Write(values[i], 1, i + 1);
-                    excel.CellColor(1, i + 1, Color.Black);
-                    excel.FontColor(1, i + 1, Color.White);
-                }
-            }
-            catch
-            {
-                Console.WriteLine("Error adding headers! ");
-                excel.Close();
             }
         }
 
@@ -149,49 +147,29 @@ namespace Parse_log
             {
                 foreach (string key in keys)
                 {
-                    switch (key)
+                    int columnIndex = headers.FindElementIndex(key);
+
+                    switch (columnIndex)
                     {
-                        case "timeStamp":
-                            string time = FormatTime(logLine["timeStamp"]);
+                        case 1:
+                            string time = FormatTime(logLine[key]);
                             excel.Write(time, row, 1);
                             break;
-                        case "level":
-                            excel.Write(logLine["level"], row, 2);
-                            Color color = ChooseColor(logLine["level"]);
+                        case 2:
+                            excel.Write(logLine[key], row, 2);
+                            Color color = ChooseColor(logLine[key]);
                             excel.CellColor(row, 2, color);
                             break;
-                        case "processName":
-                            excel.Write(logLine["processName"], row, 3);
-                            break;
-                        case "message":
-                            excel.Write(logLine["message"], row, 4);
-                            break;
-                        case "fileName":
-                            excel.Write(logLine["fileName"], row, 5);
-                            break;
-                        case "processVersion":
-                            excel.Write(logLine["processVersion"], row, 6);
-                            break;
-                        case "robotName":
-                            excel.Write(logLine["robotName"], row, 7);
-                            break;
-                        case "machineId":
-                            excel.Write(logLine["machineId"], row, 8);
-                            break;
-                        case "jobId":
-                            excel.Write(logLine["jobId"], row, 9);
-                            break;
                         default:
-                            int index = headers.FindElementIndex(key); // header list is shorter than all the headers in excel file
-                            if (index != -1)
+                            if (columnIndex == -1)
                             {
-                                index += 9;
-                                excel.Write(logLine[key], row, index);
+                                columnIndex = headers.GetCount() + 1;
+                                AddHeader(key, excel, columnIndex, headers);
+                                excel.Write(logLine[key], row, columnIndex);
                             }
                             else
                             {
-                                index = 9 + headers.AddHeader(key); // header list is shorter than all the headers in excel file
-                                excel.WriteNew(key, logLine[key], row, index);
+                                excel.Write(logLine[key], row, columnIndex);
                             }
                             break;
                     }
@@ -207,20 +185,67 @@ namespace Parse_log
         }
 
         /// <summary>
+        /// Add new header to excel file
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="excel"></param>
+        /// <param name="index"></param>
+        static private void AddHeader(string name, Excel excel, int index, Headers headers)
+        {
+            try
+            {
+                excel.Write(name, 1, index);
+                excel.CellColor(1, index, Color.Black);
+                excel.FontColor(1, index, Color.White);
+                excel.AddFilter(1, index);
+                headers.AddHeader(name);
+            }
+            catch
+            {
+                Console.WriteLine("Error adding headers! ");
+                excel.Close();
+            }
+        }
+
+        /// <summary>
         /// Modify a row from logs and split in to a dictionary
         /// </summary>
         /// <param name="elements">Row from logs</param>
         /// <returns> dictionary with attribute key and value as value</returns>
         static private Dictionary<string, string> MapElements(string elements)
         {
+            elements = elements.Split('"', 2)[1]; // seperate from beginning of the log text
             Dictionary<string, string> mappedElements = new Dictionary<string, string>();
-            List<string> subs = elements.Split('"').Where(c => c.Length > 1 || (c.Length == 1 && !Char.IsPunctuation(char.Parse(c)))).ToList();
-            for (int i = 0; i < subs.Count - 1; i += 2)
+            string[] strings = elements.Split(','); // seperate each individual element from each other
+            string[] temp;
+            string prevKey="";
+            foreach (string j in strings)
             {
-                mappedElements.Add(subs[i], subs[i + 1]);
+                try
+                {
+                    temp = j.Replace('"', ' ').Trim().Split(":", 2); //remove quotations and seperate each attribute value from its name
+                    string key = temp[0].ToLower().Trim();
+                    
+                    if (temp.Length == 1)
+                    {
+                        mappedElements[prevKey] = mappedElements[prevKey] + " " + temp[0].Trim();
+                        continue;
+                    }
+                    if (mappedElements.ContainsKey(key))
+                    {
+                        mappedElements[key] = mappedElements[key] + " " + temp[1].Trim();
+                        continue;
+                    }
+                    prevKey = key;
+                    mappedElements.Add(key, temp[1].Trim());
+
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
             return mappedElements;
-
         }
 
         /// <summary>

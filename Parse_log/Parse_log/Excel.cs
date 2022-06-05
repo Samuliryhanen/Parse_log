@@ -46,7 +46,7 @@ namespace Parse_log
         /// <param name="column">column index</param>
         public void AddFilter(int row, int column)
         {
-            ws.Cells[row, column].AutoFilter(1, System.Reflection.Missing.Value, XlAutoFilterOperator.xlAnd, System.Reflection.Missing.Value, true);
+            ws.Cells[row, column].Columns.AutoFilter(1, System.Reflection.Missing.Value, XlAutoFilterOperator.xlAnd, System.Reflection.Missing.Value, true);
         }
 
         /// <summary>
@@ -105,8 +105,8 @@ namespace Parse_log
         /// </summary>
         public void FitContent()
         {
-            ws.Columns[4].ColumnWidth = 60;
-            ws.Columns[4].WrapText = true;
+            ws.Columns[3].ColumnWidth = 60;
+            ws.Columns[3].WrapText = true;
             Range usedRange = ws.UsedRange;
             usedRange.Columns.AutoFit();
         }
