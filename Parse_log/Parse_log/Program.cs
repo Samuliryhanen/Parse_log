@@ -14,22 +14,54 @@ namespace Parse_log
         static void Main(string[] args)
         {
             Log log = new Log();
-            string name = "";
-
-
-            // tähän kohtaan processDatan edeltävät polkutoimenpiteet, yms.
-            log.ProcessData(@"C:\genretech\loginPuhdistus\test\Meita2_TUHOA.txt");
+            args = new string[]{ "./subdir/short_test.txt", @"\uusi\uudempi\excel.xlsx"};
+            
             if (args.Length >= 1)
             {
+
+                string filePathIn = Path.GetFullPath(args[0]);
+                string dirIn = Path.GetDirectoryName(filePathIn);
+                string filePathOut;
+                string dirOut;
+                string excelFileName;
+
+                bool exists = Directory.Exists(dirIn) && File.Exists(filePathIn);
+
+                if (!exists)
+                {
+                    Console.WriteLine("Invalid path or file: " + "\nPath: " + dirIn + "\nFilename: " + Path.GetFileName(filePathIn));
+                    return;
+                }
+                if ( args.Length == 2)
+                {
+                    filePathOut = Path.GetFullPath(args[1]);
+                    dirOut = Path.GetDirectoryName(filePathOut);
+
+                    exists = Directory.Exists(dirOut);
+
+                    if (!exists)
+                    {
+                        Directory.CreateDirectory(filePathOut);
+                        Console.WriteLine("Path didn`t exists; New path created: " + filePathOut);
+                    }
+                    excelFileName = Path.GetFileNameWithoutExtension(filePathOut) + ".xlsx";
+                }
+                else
+                {
+                    filePathOut = filePathIn;
+                    excelFileName = Path.GetFileNameWithoutExtension(filePathIn) + ".xlsx";
+                }
+
                 Console.WriteLine("Processing data...");
                 try
                 {
-                    name = log.ProcessData(args[0]);
-                    Console.WriteLine("Data in excel: " + name);
+                    filePathOut = Path.Combine(filePathOut, excelFileName);
+                    log.ProcessData(filePathIn, filePathOut);
+                    Console.WriteLine("Data in excel: " + filePathOut);
                 }
-                catch 
+                catch(Exception e)
                 {
-                    Console.WriteLine("Error inserting data: " + name);
+                    Console.WriteLine("Error inserting data: " + e);
                 }
             
             

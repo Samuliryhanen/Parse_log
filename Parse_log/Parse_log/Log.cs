@@ -1,6 +1,4 @@
 ﻿using System.Drawing;
-using System.Text.RegularExpressions;
-using System.Text;
 
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
@@ -64,37 +62,30 @@ namespace Parse_log
         /// Process data from a file into an array
         /// </summary>
         /// <param name="pathName"></param>
-        public string ProcessData(string pathName)
+        public void ProcessData(string pathNameIn, string pathNameOut)
         {
-            string status;
-            string file;
-            string excelName;
             try
             {
-                file = Path.GetFileNameWithoutExtension(pathName);
-                excelName = file + ".xlsx";
-                Excel excel = new Excel(@excelName, 1); // opens first worksheet of excel
+                
+                Excel excel = new Excel(pathNameOut, 1); // opens first worksheet of excel
                 Headers headers = new Headers();
                 try
                 {
-                    TransferData(pathName, excel, headers);
-                    status = excelName;
+                    TransferData(pathNameIn, excel, headers);
                     excel.AddFilter();
                     excel.FitContent();
-                    string path = Path.GetDirectoryName(pathName)+ @"\" + Path.GetFileNameWithoutExtension(excelName);
-                    excel.SaveAs(@path);
+                    excel.SaveAs(pathNameOut);
                     excel.Close();
                 }
                 catch (Exception e)
                 {
-                    status = "Error: " + (e.Message);
+                    Console.WriteLine("Error transfering data " + e);
                     excel.Close();
                 }
-                return status;
             }
             catch(Exception e)
             {
-                return "Error: " + e;
+                Console.WriteLine("Error opening excel " + e);
             }
 
         }
