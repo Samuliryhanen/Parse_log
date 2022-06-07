@@ -92,7 +92,7 @@ namespace Parse_log
         }
 
         /// <summary>
-        /// Read  from a given path and transfer it directly line by line into an excel file
+        /// Read from a given path and transfer it directly line by line into an excel file
         /// </summary>
         /// <param name="pathName">path to txt</param>
         /// <param name="excel"> excel </param>
@@ -123,13 +123,12 @@ namespace Parse_log
             }
         }
 
-
         /// <summary>
         /// Add a single row from the dictionary to excell
         /// </summary>
-        /// <param name="excel">excell</param>
+        /// <param name="excel">excel</param>
         /// <param name="logLine">row added</param>
-        /// <param name="row">row index</param>
+        /// <param name="row">row index for the excel</param>
         static private void AddExcelRow(Excel excel, Dictionary<string, string> logLine, int row, Headers headers)
         {   
             var keys = logLine.Keys;
@@ -141,11 +140,11 @@ namespace Parse_log
 
                     switch (columnIndex)
                     {
-                        case 1:
+                        case 1: // timestamp wanted to the first cell
                             string time = FormatTime(logLine[key]);
                             excel.Write(time, row, 1);
                             break;
-                        case 2:
+                        case 2: // second cell is for log-level and color code
                             excel.Write(logLine[key], row, 2);
                             Color color = ChooseColor(logLine[key]);
                             excel.CellColor(row, 2, color);
@@ -153,13 +152,13 @@ namespace Parse_log
                         default:
                             if (columnIndex == -1)
                             {
-                                columnIndex = headers.GetCount() + 1;
-                                AddHeader(key, excel, columnIndex, headers);
-                                excel.Write(logLine[key], row, columnIndex);
+                                columnIndex = headers.GetCount() + 1;       
+                                AddHeader(key, excel, columnIndex, headers);// If a new attribute add to a new column attribute name 
+                                excel.Write(logLine[key], row, columnIndex);// and value from the attribute
                             }
                             else
                             {
-                                excel.Write(logLine[key], row, columnIndex);
+                                excel.Write(logLine[key], row, columnIndex); // add value if attribute already exists
                             }
                             break;
                     }
@@ -215,12 +214,12 @@ namespace Parse_log
                     temp = j.Replace('"', ' ').Trim().Split(":", 2); //remove quotations and seperate each attribute value from its name
                     string key = temp[0].ToLower().Trim();
                     
-                    if (temp.Length == 1)
+                    if (temp.Length == 1) // log-file can include Chars such as ":" or "," , which breaks the sorting
                     {
                         mappedElements[prevKey] = mappedElements[prevKey] + " " + temp[0].Trim();
                         continue;
                     }
-                    if (mappedElements.ContainsKey(key))
+                    if (mappedElements.ContainsKey(key)) // if broken data contains existing key-name, just add the value to a proper cell
                     {
                         mappedElements[key] = mappedElements[key] + " " + temp[1].Trim();
                         continue;
@@ -238,7 +237,7 @@ namespace Parse_log
         }
 
         /// <summary>
-        /// Format time to a wanted string 
+        /// Format time 
         /// </summary>
         /// <param name="time">timestamp </param>
         /// <returns>formatted time in a string</returns>

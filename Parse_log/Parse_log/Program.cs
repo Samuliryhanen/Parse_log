@@ -15,8 +15,6 @@ namespace Parse_log
         static void Main(string[] args)
         {
             Log log = new Log();
-            args = new string[]{ @".\subdir\test.txt", @".\subdir\test\asd.xlsx"};
-
 
             if (args.Length >= 1)
             {
