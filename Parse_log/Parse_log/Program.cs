@@ -1,6 +1,7 @@
 ﻿/// <summary>
 /// Program for reading UIpath-log messages and inserting them to more readable excel-file
-/// @Author Samuli Ryhänen 24.05.2022
+/// @Author Samuli Ryhänen 07.06.2022
+/// @Genretech Oy
 /// </summary>
 namespace Parse_log
 {
@@ -14,8 +15,9 @@ namespace Parse_log
         static void Main(string[] args)
         {
             Log log = new Log();
-            args = new string[]{ "./subdir/short_test.txt", @"\uusi\uudempi\excel.xlsx"};
-            
+            args = new string[]{ @".\subdir\test.txt", @".\subdir\test\asd.xlsx"};
+
+
             if (args.Length >= 1)
             {
 
@@ -41,30 +43,27 @@ namespace Parse_log
 
                     if (!exists)
                     {
-                        Directory.CreateDirectory(filePathOut);
-                        Console.WriteLine("Path didn`t exists; New path created: " + filePathOut);
+                        Console.WriteLine("Invalid path or file: " + "\nPath: " + dirOut + "\nFilename: "+ Path.GetFileName(filePathOut));
                     }
                     excelFileName = Path.GetFileNameWithoutExtension(filePathOut) + ".xlsx";
                 }
                 else
                 {
-                    filePathOut = filePathIn;
+                    dirOut = Path.GetDirectoryName(filePathIn);
                     excelFileName = Path.GetFileNameWithoutExtension(filePathIn) + ".xlsx";
                 }
 
                 Console.WriteLine("Processing data...");
                 try
                 {
-                    filePathOut = Path.Combine(filePathOut, excelFileName);
-                    log.ProcessData(filePathIn, filePathOut);
-                    Console.WriteLine("Data in excel: " + filePathOut);
+                    string excelPath = Path.Combine(dirOut, excelFileName);
+                    log.ProcessData(filePathIn, excelPath);
+                    Console.WriteLine("Data in excel: " + excelPath);
                 }
                 catch(Exception e)
                 {
                     Console.WriteLine("Error inserting data: " + e);
-                }
-            
-            
+                }            
             }
             
         }

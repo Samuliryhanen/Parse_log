@@ -2,17 +2,19 @@
 
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
-/// @Author Samuli Ryhänen 24.05.2022
+/// @Author Samuli Ryhänen 07.06.2022
+/// @Genretech Oy
 /// </summary>
 namespace Parse_log
 {
-    //class to handle dilemma with overflown attributes
+    //Class to add dynamically new attributes to the excelfile
     public class Headers
     {
-        private List<string> OverflowingHeaders = new List<string>(); // list for headers, which are not defined in switch-case sorting
-        
+        // list for new headers
+        private List<string> OverflowingHeaders = new List<string>();
+
         /// <summary>
-        /// Add new member to List
+        /// Add new member to OverflowingHeaders
         /// </summary>
         /// <param name="header"></param>
         /// <returns></returns>
@@ -22,7 +24,7 @@ namespace Parse_log
             return OverflowingHeaders.Count;
         }
         /// <summary>
-        /// Find index of an element
+        /// Find index of an element from OverflowingHeaders
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
@@ -36,17 +38,17 @@ namespace Parse_log
             return index; 
         }
         /// <summary>
-        /// Get List attribute
+        /// Get OverflowingHeaders
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List<String, String>OverflowingHeaders </returns>
         public List<string> GetValues()
         {
             return OverflowingHeaders;
         }
         /// <summary>
-        /// Get count of List
+        /// Get count of OverflowingHeaders
         /// </summary>
-        /// <returns></returns>
+        /// <returns>integer</returns>
         public int GetCount()
         {
             return OverflowingHeaders.Count;
@@ -66,8 +68,7 @@ namespace Parse_log
         {
             try
             {
-                
-                Excel excel = new Excel(pathNameOut, 1); // opens first worksheet of excel
+                Excel excel = new Excel(pathNameOut, 1); // opens new excel, sheet no.1
                 Headers headers = new Headers();
                 try
                 {
@@ -91,7 +92,7 @@ namespace Parse_log
         }
 
         /// <summary>
-        /// Read .txt-file from a given path and transfer it directly line by line into an excel file
+        /// Read  from a given path and transfer it directly line by line into an excel file
         /// </summary>
         /// <param name="pathName">path to txt</param>
         /// <param name="excel"> excel </param>

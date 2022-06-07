@@ -5,7 +5,8 @@ using System.Drawing;
 
 /// <summary>
 /// Excel class for reading and writing to an excel document
-/// @author Samuli Ryhänen 24.05.2022
+/// @Author Samuli Ryhänen 07.06.2022
+/// @Genretech Oy
 /// </summary>
 namespace Parse_log
 {
