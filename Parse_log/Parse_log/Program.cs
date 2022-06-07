@@ -15,6 +15,9 @@ namespace Parse_log
         {
             Log log = new Log();
             string name = "";
+
+
+            // tähän kohtaan processDatan edeltävät polkutoimenpiteet, yms.
             log.ProcessData(@"C:\genretech\loginPuhdistus\test\Meita2_TUHOA.txt");
             if (args.Length >= 1)
             {

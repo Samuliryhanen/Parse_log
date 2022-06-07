@@ -40,13 +40,12 @@ namespace Parse_log
         }
 
         /// <summary>
-        /// Add filtering to specified column
+        /// Apply autofilter to the worksheet
         /// </summary>
-        /// <param name="row">row for the column</param>
-        /// <param name="column">column index</param>
-        public void AddFilter(int row, int column)
+        public void AddFilter()
         {
-            ws.Cells[row, column].Columns.AutoFilter(1, System.Reflection.Missing.Value, XlAutoFilterOperator.xlAnd, System.Reflection.Missing.Value, true);
+            Range range = ws.UsedRange;
+            range.Columns.AutoFilter(1, System.Reflection.Missing.Value, XlAutoFilterOperator.xlAnd, System.Reflection.Missing.Value, true);
         }
 
         /// <summary>

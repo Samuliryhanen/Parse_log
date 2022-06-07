@@ -79,10 +79,7 @@ namespace Parse_log
                 {
                     TransferData(pathName, excel, headers);
                     status = excelName;
-                    for(int i = 1; i < headers.GetCount(); i++)
-                    {
-                        excel.AddFilter(1, i);
-                    }
+                    excel.AddFilter();
                     excel.FitContent();
                     string path = Path.GetDirectoryName(pathName)+ @"\" + Path.GetFileNameWithoutExtension(excelName);
                     excel.SaveAs(@path);
@@ -128,6 +125,7 @@ namespace Parse_log
                     catch
                     {
                         Console.WriteLine("Error inserting rows!");
+                        excel.Close();
                     }
                 }
             }
@@ -197,7 +195,6 @@ namespace Parse_log
                 excel.Write(name, 1, index);
                 excel.CellColor(1, index, Color.Black);
                 excel.FontColor(1, index, Color.White);
-                excel.AddFilter(1, index);
                 headers.AddHeader(name);
             }
             catch
