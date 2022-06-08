@@ -42,6 +42,7 @@ namespace Parse_log
                     if (!exists)
                     {
                         Console.WriteLine("Invalid path or file: " + "\nPath: " + dirOut + "\nFilename: "+ Path.GetFileName(filePathOut));
+                        return;
                     }
                     excelFileName = Path.GetFileNameWithoutExtension(filePathOut) + ".xlsx";
                 }
