@@ -30,4 +30,5 @@ Pidemmät tiedostot, joissa dataa on useita satoja rivejä, sekä sarakkeita, hi
 Ajon päätyttyä oheinen teksti  muodostuu ruutun, jossa on kerrotuna excel-tiedoston sijainti.
 
 ![exampleProduct](https://user-images.githubusercontent.com/74860432/172547035-e4f47ad2-d4c8-4d12-9ab8-f2e0d3320e25.png)
+
 Tuotetussa taulukossa on mm. Filtteröinti käytössä.
