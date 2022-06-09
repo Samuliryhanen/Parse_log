@@ -3,7 +3,7 @@
 /// <summary>
 /// Class for reading UIpath-log messages and inserting them to more readable excel-file
 /// @Author Samuli Ryhänen 07.06.2022
-/// @Genretech Oy
+/// @GenreTech Oy
 /// </summary>
 namespace Parse_log
 {
@@ -147,6 +147,11 @@ namespace Parse_log
                         case 2: // second cell is for log-level and color code
                             excel.Write(logLine[key], row, 2);
                             Color color = ChooseColor(logLine[key]);
+                            if(logLine[key].ToLower() != "warning") // better contrast 
+                            {
+                                excel.FontColor(row, 2, Color.White);
+                            }
+                            
                             excel.CellColor(row, 2, color);
                             break;
                         default:
@@ -248,7 +253,7 @@ namespace Parse_log
             {
                 DateTime datetime = DateTime.ParseExact(time, "yyyy-MM-ddTHH:mm:ss.fffffffzzz",
                                            System.Globalization.CultureInfo.InvariantCulture);
-                formatted = datetime.ToString("yyyy-MM-dd HH:mm:ss.fffffff");
+                formatted = datetime.ToString("@yyyy-MM-dd HH:mm:ss.fffffff"); // excel will omit autoformat with @- char 
             }
             /// seconds have sometimes different amount of decimals
             catch
@@ -261,6 +266,7 @@ namespace Parse_log
 
         /// <summary>
         /// Choose a color for a log message level
+        /// contrast checked with https://webaim.org/resources/contrastchecker/
         /// </summary>
         /// <param name="logLevel">log level</param>
         /// <returns> Color value</returns>
@@ -270,23 +276,24 @@ namespace Parse_log
             switch (logLevel)
             {
                 case "Information":
-                    color = Color.DarkGreen;
+                    color = Color.FromArgb(44, 96, 1);
                     break;
                 case "Error":
-                    color = Color.RosyBrown;
+                    color = Color.FromArgb(163, 49, 0);
                     break;
                 case "Fatal":
-                    color = Color.IndianRed;
+                    color = Color.FromArgb(179, 0, 0); 
                     break;
                 case "Warning":
-                    color = Color.LightGoldenrodYellow;
+                    color = Color.LightGoldenrodYellow; // okay as it is
                     break;
                 case "Trace":
-                    color = Color.CadetBlue;
+                    color = Color.FromArgb(37, 72, 212);
                     break;
                 case "Verbose":
-                    color = Color.DarkGray;
+                    color = Color.Black;
                     break;
+
                 default:
                     color = Color.White;
                     break;

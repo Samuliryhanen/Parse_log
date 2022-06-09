@@ -6,7 +6,7 @@ using System.Drawing;
 /// <summary>
 /// Excel class for reading and writing to an excel document
 /// @Author Samuli Ryhänen 07.06.2022
-/// @Genretech Oy
+/// @GenreTech Oy
 /// </summary>
 namespace Parse_log
 {
@@ -105,6 +105,7 @@ namespace Parse_log
         /// </summary>
         public void FitContent()
         {
+            
             ws.Columns[3].ColumnWidth = 60;
             ws.Columns[3].WrapText = true;
             Range usedRange = ws.UsedRange;

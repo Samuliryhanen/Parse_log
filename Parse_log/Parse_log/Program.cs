@@ -1,7 +1,7 @@
 ﻿/// <summary>
 /// Program for reading UIpath-log messages and inserting them to more readable excel-file
 /// @Author Samuli Ryhänen 07.06.2022
-/// @Genretech Oy
+/// @GenreTech Oy
 /// </summary>
 namespace Parse_log
 {
