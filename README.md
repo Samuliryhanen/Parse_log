@@ -9,8 +9,7 @@ Program for reading UIpath-log messages and inserting them into a more readable 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## Introduction
 
