@@ -1,34 +1,59 @@
-Tämä on pieni projekti tehtynä Genretech Oy:lle. Scriptin ideana on käsitellä tietynlaista lokiviestiä, lajitella sen attribuutit ja lisätä mm. värikoodattuna excel-tiedostoon.
+# UIpath logs to excel
 
-Ohjelma ottaa syötteeksi loki-tiedoston, jonka sisältönä on tekstidataa, ja lajittelee sen exceliin taulukkomuotoon.
-Tekstidatan koostuu lokiviestin alusta, 
+Program for reading UIpath-log messages and inserting them into a more readable Excel file.
 
-Esim. 06:00:10.7301 Info {
+## Table of Contents
 
-Sekä Json-muotoisesta tekstidatasta, jonka rakenne on seuraava: 
-"message":"some text ","level":"Information","logType":"Default","timeStamp": "....."
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Lajittelusta tekee haastavan se että lokien attirbuuttien sisällä olevat arvot voivat sisältää sisäkkäisiä attribuutteja; esim. Message kentän arvona saattaa lukea sisäkkäisenä toinen message-attribuutti, sekä sen arvo. Siinä tapauksessa lisätään se saman rivin message-soluun. Mikäli kyseessä on uusi attribuutti, lisätään se otsakkeisiin ja data oikean sarakkeen soluun. 
+## Introduction
 
-Ohjelma tarvitsee .NET-frameworkin asennettuna koneelle ennen .exe-tiedostoon kääntämistä
+This project processes UIpath log messages, transforming them into a structured Excel format for easier analysis and readability.
 
-Ajo onnistuu komentoriviltä joko kahdella tai yhdellä parametrilla. 
-Parametriksi sopii absoluuttinen tai suhteellinen polku ajokansiosta käsiteltävään tiedostoon.
+## Features
 
-![oneParam](https://user-images.githubusercontent.com/74860432/172547013-c6f821bf-1409-4879-901d-b9e4031cad97.png)
+- Reads UIpath log messages.
+- Inserts log messages into a structured Excel file.
+- Applies formatting to Excel cells based on log levels.
+- Adds dynamic headers for new attributes found in log messages.
+- Auto-filters and fits content in the Excel file.
 
-Yhden argumentin ajo takaa samannimisen tiedoston samaan kansioon, kuin missä argumentinkin tiedosto sijaitsee.
-![twoParam](https://user-images.githubusercontent.com/74860432/172547017-4ed42224-029d-435b-b2e0-1c19a75f042d.png)
+## Installation
 
-Toinen argumentti määrittää tuloste-tiedoston sijainnin, sekä nimen. Molemmat täytyy sisältää argumenttiin.
-![invalidParam](https://user-images.githubusercontent.com/74860432/172547022-0ea5a975-2547-4213-9d5d-05fda1d4eb09.png)
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/yourusername/Parse_log.git
+    ```
+2. Navigate to the project directory:
+    ```sh
+    cd Parse_log
+    ```
+3. Open the solution in Visual Studio.
 
-Mikäli polku on virheellinen, tai tiedoston nimi väärä, palataan pääohjelmasta.
-![success](https://user-images.githubusercontent.com/74860432/172547028-f229ba73-ac18-4c4c-903b-5a540c553528.png)
+## Usage
 
-Pidemmät tiedostot, joissa dataa on useita satoja rivejä, sekä sarakkeita, hidastavat ajoa. 
-Ajon päätyttyä oheinen teksti  muodostuu ruutun, jossa on kerrotuna excel-tiedoston sijainti.
+1. Build the solution in Visual Studio.
+2. Run the executable with the log file path as an argument:
+    ```sh
+    Parse_log.exe path\to\logfile.txt [path\to\outputfile.xlsx]
+    ```
+    If the output file path is not provided, the Excel file will be saved in the same directory as the log file.
 
-![exampleProduct](https://user-images.githubusercontent.com/74860432/172547035-e4f47ad2-d4c8-4d12-9ab8-f2e0d3320e25.png)
+## Project Structure
 
-Tuotetussa taulukossa on mm. Filtteröinti käytössä.
+- **Program.cs**: The main entry point for the application. Handles command-line arguments and initiates the data processing.
+- **Log.cs**: Contains the `Log` and `Headers` classes, responsible for processing the log data and managing dynamic headers.
+- **Excel.cs**: Provides functionality for interacting with Excel files, including reading, writing, and applying formatting.
+
+## Example
+
+Here's a quick example of how to use the program:
+
+```sh
+Parse_log.exe C:\Logs\uipath-log.txt C:\Logs\formatted-log.xlsx
